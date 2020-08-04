@@ -1,4 +1,5 @@
 import json
+import sys
 import time
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -9,7 +10,6 @@ from country import const_countries
 # TODO запись в файл csv ?
 # TODO плохие домены чекать через селениум
 
-# TODO посмотреть, что можно взять из предыдущей версии симилара
 # TODO проверка на наличие хромдрайвера
 
 
@@ -28,6 +28,7 @@ class Similar:
         self.domain = []
         self.monthly_visits = []
         self.count = 0
+        self.file_domain_count = 0
 
     def __create_list_of_domains(self):
         """ Создание чистого списка доменов из файла. """
@@ -40,6 +41,12 @@ class Similar:
                 else:
                     need_url = url.replace('www.', '')
                     self.domain.append(need_url)
+
+    def __count_of_links(self):
+        """ Подсчет количества доменов в файле. """
+        with open(self.file_input, 'r', encoding='utf-8') as file:
+            for _ in file:
+                self.file_domain_count += 1
 
     def __rounding(self, number_to_round):
         """ Округление трафика, к виду similar'a. """
@@ -76,14 +83,11 @@ class Similar:
             monthly_visits_top5 = _json['EstimatedMonthlyVisits']
             top_country = _json['TopCountryShares']
             site_name = _json['SiteName']
-
             if self.domain[self.count - 1] == site_name:
                 for date in monthly_visits_top5:
                     self.monthly_visits.append(monthly_visits_top5[date])
                     print(site_name, date, self.__rounding(monthly_visits_top5[date]))
-
                 print(site_name + '\t' + 'Total Traffic' + '\t' + str(self.__rounding(self.monthly_visits[-1])))
-
                 for country in top_country:
                     country_name = const_countries[str(country['Country'])]
                     top5_traffic = self.__rounding(round(self.monthly_visits[-1] * country['Value']))
@@ -94,11 +98,17 @@ class Similar:
     def run(self):
         """ Главная функция. """
         self.__create_list_of_domains()
+        self.__count_of_links()
         while True:
             if self.count == len(self.domain):
                 self.driver.quit()
                 break
             self.count += 1
+
+            sys.stdout.write('\r' + 'Пройдено ссылок: ' + str(self.count) + ' из ' + str(self.file_domain_count) +
+                             ' домен - ' + str(self.domain[self.count - 1]))
+            sys.stdout.flush()
+
             self.driver.get(f'https://data.similarweb.com/api/v1/data?domain={self.domain[self.count - 1]}')
             source = self.driver.page_source
             soup = BeautifulSoup(source, 'html.parser')
@@ -108,5 +118,26 @@ class Similar:
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     similar = Similar(headless=False)  # Если False - браузер будет виден, если True - не будет
     similar.run()
+    finish_time = time.time()
+    print(f'Время затраченное на сбор данных - {round(finish_time - start_time)}')
+
+
+
+# print(f'\n\n{"":-^60}\n'
+#       f'{" Готово! ":-^60}\n'
+#       f'{" Положительный результат смотри в файле - output.txt ":-^65}\n'
+#       f'{" Необработанные ссылки смотри в файле - bad_links.txt ":-^65}\n'
+#       f'{" Посещаемость за все месяца смотри в файле - all_month.txt ":-^65}\n'
+#       f'{" Парсинг занял - " + str(parse_time) + " секунд ":-^65}\n'
+#       f'{"":-^65}')
+# print(f'{" Для выхода из программы нажмите - Enter ":-^65}\n{"":-^65}\n')
+#
+# print('*** После прохождения 20 ссылок необходимо выждать минуту, для обхода блокировки ***'
+#       '\n*** Процесс автоматический, ничего делать не нужно! ***\n')
+# print('Начинаем парсинг данных...')
+#
+# file.write('Домен' + '\t' + 'Разбивка по странам' + '\t' + 'Посещаемость' + '\t' + 'FastFilter' + '\n')
+
