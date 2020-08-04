@@ -8,7 +8,7 @@ from country import const_countries
 
 # TODO запись в файл csv ?
 # TODO плохие домены чекать через селениум
-# TODO проверка инпут файла на https / www / .
+
 # TODO добавить описание функций и класов
 # TODO посмотреть, что можно взять из предыдущей версии симилара
 # TODO проверка на наличие хромдрайвера
@@ -31,7 +31,12 @@ class Similar:
         with open(file=self.file_input, mode='r', encoding='utf-8') as file:
             for url in file:
                 url = url.replace('\n', '')
-                self.domain.append(url)
+                if '//' in url:
+                    need_url = url.replace('http://', '').replace('https://', '').replace('www.', '').split('/')[0]
+                    self.domain.append(need_url)
+                else:
+                    need_url = url.replace('www.', '')
+                    self.domain.append(need_url)
 
     def __rounding(self, number_to_round):
         number = str(number_to_round)
