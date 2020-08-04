@@ -134,7 +134,6 @@ class Similar:
             source = self.driver.page_source
             soup = BeautifulSoup(source, 'html.parser')
             self.__preparing_data(soup=soup)
-
             # print(soup)  # убрать после отладки
 
 
