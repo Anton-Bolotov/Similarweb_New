@@ -1,13 +1,14 @@
 import json
+import os
 import time
 from selenium import webdriver
 from bs4 import BeautifulSoup
+from selenium.common.exceptions import WebDriverException
 from country import const_countries
 
 
 # TODO проверка на капчу
 # TODO плохие домены чекать через селениум
-# TODO проверка на наличие хромдрайвера
 
 
 class Similar:
@@ -15,12 +16,18 @@ class Similar:
 
     def __init__(self, headless=True):
         """ Parameters needed for operation. """
-        if headless:
-            self.options = webdriver.ChromeOptions()
-            self.options.add_argument('headless')
-            self.driver = webdriver.Chrome(options=self.options)
-        else:
-            self.driver = webdriver.Chrome()
+        try:
+            if headless:
+                self.options = webdriver.ChromeOptions()
+                self.options.add_argument('headless')
+                self.driver = webdriver.Chrome(options=self.options)
+            else:
+                self.driver = webdriver.Chrome()
+        except WebDriverException:
+            print('chromedriver.exe needed, please put it in the script folder')
+            time.sleep(2)
+            quit()
+
         self.file_input = 'input.txt'
         self.file_output = 'output.txt'
         self.bad_file = 'bad_links.txt'
@@ -29,6 +36,7 @@ class Similar:
         self.monthly_visits = []
         self.count = 0
         self.file_domain_count = 0
+        self.path = os.getcwd()
 
     def __create_list_of_domains(self):
         """ Creating a clean list of domains from a file. """
