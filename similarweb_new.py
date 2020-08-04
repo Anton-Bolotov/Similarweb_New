@@ -25,7 +25,9 @@ class Similar:
                 self.driver = webdriver.Chrome()
         except WebDriverException:
             print('chromedriver.exe needed, please put it in the script folder')
-            time.sleep(2)
+            print("If you don't have one download it from the link below")
+            print('https://chromedriver.storage.googleapis.com/84.0.4147.30/chromedriver_win32.zip')
+            input('To exit the program, click - Enter!')
             quit()
 
         self.file_input = 'input.txt'
@@ -142,13 +144,12 @@ class Similar:
             source = self.driver.page_source
             soup = BeautifulSoup(source, 'html.parser')
             self.__preparing_data(soup=soup)
-            # print(soup)  # убрать после отладки
 
 
 if __name__ == '__main__':
     start_time = time.time()
+    similar = Similar(headless=True)  # if False - the browser will be visible, elif True - will not be
     print('---> Starting data collection')
-    similar = Similar(headless=True)  # Если False - браузер будет виден, если True - не будет
     similar.run()
     finish_time = time.time()
     print('---> Done!')
