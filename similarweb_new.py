@@ -33,6 +33,24 @@ class Similar:
                 url = url.replace('\n', '')
                 self.domain.append(url)
 
+    def __rounding(self, number_to_round):
+        number = str(number_to_round)
+        if len(number) >= 7:
+            h = number[:3] + '.' + number[3:]
+            j = round(float(h))
+            g = str(j) + '0' * (len(number) - 3)
+            return g
+        elif 5 <= len(number) <= 6:
+            h = number[:2] + '.' + number[2:]
+            j = round(float(h))
+            g = str(j) + '0' * (len(number) - 2)
+            return g
+        elif 1 <= len(number) <= 4:
+            h = number[:1] + '.' + number[1:]
+            j = round(float(h))
+            g = str(j) + '0' * (len(number) - 1)
+            return g
+
     def run(self):
         self.__create_list_of_domains()
         while True:
@@ -61,15 +79,18 @@ class Similar:
                 top_country = _json['TopCountryShares']
                 site_name = _json['SiteName']
                 monthly_visits = []
+
                 if self.domain[self.count - 1] == site_name:
                     for date in monthly_visits_top5:
                         monthly_visits.append(monthly_visits_top5[date])
-                        print(site_name, date, monthly_visits_top5[date])
+                        print(site_name, date, self.__rounding(monthly_visits_top5[date]))
 
-                    print(site_name + '\t' + 'Total Traffic' + '\t' + str(monthly_visits[-1]))
+                    print(site_name + '\t' + 'Total Traffic' + '\t' + str(self.__rounding(monthly_visits[-1])))
 
                     for country in top_country:
-                        print(site_name, const_countries[str(country['Country'])], round(monthly_visits[-1] * country['Value']))
+                        country_name = const_countries[str(country['Country'])]
+                        top5_traffic = self.__rounding(round(monthly_visits[-1] * country['Value']))
+                        print(site_name, country_name, top5_traffic)
                 else:
                     print('https://www.similarweb.com/website/' + str(self.domain[self.count - 1]))
 
