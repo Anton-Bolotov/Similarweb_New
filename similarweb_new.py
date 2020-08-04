@@ -7,10 +7,6 @@ from selenium.common.exceptions import WebDriverException
 from country import const_countries
 
 
-# TODO проверка на капчу
-# TODO плохие домены чекать через селениум
-
-
 class Similar:
     """ Class for working with API Similarweb. """
 
@@ -152,7 +148,7 @@ class Similar:
 
 if __name__ == '__main__':
     start_time = time.time()
-    similar = Similar(headless=True)  # if False - the browser will be visible, if True - will not be
+    similar = Similar(headless=False)  # if False - the browser will be visible, if True - will not be
     print('---> Starting data collection')
     similar.run()
     finish_time = time.time()
