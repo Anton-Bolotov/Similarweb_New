@@ -11,6 +11,7 @@ from country import const_countries
 # TODO проверка инпут файла на https / www / .
 # TODO добавить описание функций и класов
 # TODO посмотреть, что можно взять из предыдущей версии симилара
+# TODO проверка на наличие хромдрайвера
 
 
 class Similar:
