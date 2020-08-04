@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from country import const_countries
 
 # TODO проверка на капчу
-# TODO красивые цифры как на симиларе
+
 # TODO запись в файл csv ?
 # TODO плохие домены чекать через селениум
 # TODO проверка инпут файла на https / www / .
