@@ -7,17 +7,17 @@ from country import const_countries
 
 # TODO проверка на капчу
 
-# TODO запись в файл csv ?
+# TODO запись в файл
 # TODO плохие домены чекать через селениум
 
 # TODO проверка на наличие хромдрайвера
 
 
 class Similar:
-    """ Класс для работы с API Similarweb. """
+    """ Class for working with API Similarweb. """
 
     def __init__(self, headless=True):
-        """ Параметры нужные для работы. """
+        """ Parameters needed for operation. """
         if headless:
             self.options = webdriver.ChromeOptions()
             self.options.add_argument('headless')
@@ -25,13 +25,16 @@ class Similar:
         else:
             self.driver = webdriver.Chrome()
         self.file_input = 'input.txt'
+        self.file_output = 'output.txt'
+        self.bad_file = 'bad_links.txt'
+        self.all_months = 'all_months.txt'
         self.domain = []
         self.monthly_visits = []
         self.count = 0
         self.file_domain_count = 0
 
     def __create_list_of_domains(self):
-        """ Создание чистого списка доменов из файла. """
+        """ Creating a clean list of domains from a file. """
         with open(file=self.file_input, mode='r', encoding='utf-8') as file:
             for url in file:
                 url = url.replace('\n', '')
@@ -42,14 +45,22 @@ class Similar:
                     need_url = url.replace('www.', '')
                     self.domain.append(need_url)
 
+    def __create_files_to_write(self):
+        with open(file=self.file_output, mode='w', encoding='utf-8') as file_out:
+            file_out.write('Domain' + '\t' + 'Country' + '\t' + 'Amount of traffic' + '\t' + 'Comment' + '\n')
+        with open(file=self.bad_file, mode='w', encoding='utf-8') as bad_file:
+            bad_file.write('These links must be checked manually:\n')
+        with open(file=self.all_months, mode='w', encoding='utf-8') as all_months:
+            all_months.write('Domain' + '\t' + 'Date' + '\t' + 'Amount of traffic' + '\n')
+
     def __count_of_links(self):
-        """ Подсчет количества доменов в файле. """
+        """ Counting the number of domains in a file. """
         with open(self.file_input, 'r', encoding='utf-8') as file:
             for _ in file:
                 self.file_domain_count += 1
 
     def __rounding(self, number_to_round):
-        """ Округление трафика, к виду similar'a. """
+        """ Rounding traffic by type similarweb. """
         number = str(number_to_round)
         if len(number) >= 7:
             h = number[:3] + '.' + number[3:]
@@ -68,15 +79,14 @@ class Similar:
             return g
 
     def __preparing_data(self, soup):
-        """ Подготовка данных к их дальнейшему использованию. """
+        """ Preparing data for further use. """
         if 'HTTP ERROR 429' in str(soup) or '<html><head></head><body></body></html>' in str(soup):
-            print('Забанили, нужно подождать')
             time.sleep(61)
             self.count -= 1
         elif '{}' in str(soup):
             print('https://www.similarweb.com/website/' + str(self.domain[self.count - 1]))
         elif 'invalid payload' in str(soup):
-            print('Это не домен! Проверь - ' + str(self.domain[self.count - 1]))
+            print('This is not a domain! Check - ' + str(self.domain[self.count - 1]))
         else:
             find_json = soup.find('pre').text
             _json = json.loads(find_json)
@@ -87,16 +97,20 @@ class Similar:
                 for date in monthly_visits_top5:
                     self.monthly_visits.append(monthly_visits_top5[date])
                     print(site_name, date, self.__rounding(monthly_visits_top5[date]))
+
                 print(site_name + '\t' + 'Total Traffic' + '\t' + str(self.__rounding(self.monthly_visits[-1])))
+
                 for country in top_country:
                     country_name = const_countries[str(country['Country'])]
                     top5_traffic = self.__rounding(round(self.monthly_visits[-1] * country['Value']))
                     print(site_name, country_name, top5_traffic)
+
             else:
                 print('https://www.similarweb.com/website/' + str(self.domain[self.count - 1]))
 
     def run(self):
         """ Главная функция. """
+        self.__create_files_to_write()
         self.__create_list_of_domains()
         self.__count_of_links()
         while True:
@@ -122,7 +136,7 @@ if __name__ == '__main__':
     similar = Similar(headless=False)  # Если False - браузер будет виден, если True - не будет
     similar.run()
     finish_time = time.time()
-    print(f'Время затраченное на сбор данных - {round(finish_time - start_time)}')
+    print(f'Time spent on data collection - {round(finish_time - start_time)}')
 
 
 
