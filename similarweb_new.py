@@ -42,15 +42,20 @@ class Similar:
 
     def __create_list_of_domains(self):
         """ Creating a clean list of domains from a file. """
-        with open(file=self.file_input, mode='r', encoding='utf-8') as file:
-            for url in file:
-                url = url.replace('\n', '')
-                if '//' in url:
-                    need_url = url.replace('http://', '').replace('https://', '').replace('www.', '').split('/')[0]
-                    self.domain.append(need_url)
-                else:
-                    need_url = url.replace('www.', '')
-                    self.domain.append(need_url)
+        try:
+            with open(file=self.file_input, mode='r', encoding='utf-8') as file:
+                for url in file:
+                    url = url.replace('\n', '')
+                    if '//' in url:
+                        need_url = url.replace('http://', '').replace('https://', '').replace('www.', '').split('/')[0]
+                        self.domain.append(need_url)
+                    else:
+                        need_url = url.replace('www.', '')
+                        self.domain.append(need_url)
+        except FileNotFoundError:
+            print('Please create a file input.txt and put data there')
+            input('To exit the program, click - Enter!')
+            quit()
 
     def __create_files_to_write(self):
         with open(file=self.file_output, mode='w', encoding='utf-8') as file_out:
@@ -106,6 +111,7 @@ class Similar:
             monthly_visits_top5 = _json['EstimatedMonthlyVisits']
             top_country = _json['TopCountryShares']
             site_name = _json['SiteName']
+
             if self.domain[self.count - 1] == site_name:
                 for date in monthly_visits_top5:
                     self.monthly_visits.append(monthly_visits_top5[date])
@@ -136,10 +142,8 @@ class Similar:
                 self.driver.quit()
                 break
             self.count += 1
-
             print('---> Passed domains: ' + str(self.count) + ' from ' + str(self.file_domain_count) +
                              ' domain - ' + str(self.domain[self.count - 1]))
-
             self.driver.get(f'https://data.similarweb.com/api/v1/data?domain={self.domain[self.count - 1]}')
             source = self.driver.page_source
             soup = BeautifulSoup(source, 'html.parser')
@@ -148,14 +152,13 @@ class Similar:
 
 if __name__ == '__main__':
     start_time = time.time()
-    similar = Similar(headless=True)  # if False - the browser will be visible, elif True - will not be
+    similar = Similar(headless=True)  # if False - the browser will be visible, if True - will not be
     print('---> Starting data collection')
     similar.run()
     finish_time = time.time()
-    print('---> Done!')
+    print('---> Done!\n')
     print('---> See the positive result in the file - output.txt')
     print('---> For raw links, see the file - bad_links.txt')
     print('---> Traffic for all months see the file - all_months.txt')
     print(f'---> Time spent on data collection - {round(finish_time - start_time, 2)} second')
-    print('---> To exit the program, click - Enter!')
-    input()
+    input('---> To exit the program, click - Enter!')
