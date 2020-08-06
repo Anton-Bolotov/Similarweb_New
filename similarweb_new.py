@@ -125,7 +125,7 @@ class Similar:
                     self.__write_to_file(file_name=self.file_output, str_to_write=_need_write)
                     number_top_list += 1
             else:
-                need_write = 'https://www.similarweb.com/website/' + str(self.domain[self.count - 1])
+                need_write = 'https://www.similarweb.com/website/' + str(self.domain[self.count - 1]) + '\n'
                 self.__write_to_file(file_name=self.bad_file, str_to_write=need_write)
 
     def run(self):
