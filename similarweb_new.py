@@ -7,6 +7,12 @@ from selenium.common.exceptions import WebDriverException
 from country import const_countries
 
 
+class Human_test(Exception):
+
+    def __init__(self, text):
+        self.txt = text
+
+
 class Similar:
     """ Class for working with API Similarweb. """
 
@@ -23,6 +29,7 @@ class Similar:
             print('chromedriver.exe needed, please put it in the script folder')
             print("If you don't have one download it from the link below")
             print('https://chromedriver.storage.googleapis.com/84.0.4147.30/chromedriver_win32.zip')
+            print('or download the latest version from here https://chromedriver.chromium.org/downloads')
             input('To exit the program, click - Enter!')
             quit()
 
@@ -101,6 +108,9 @@ class Similar:
             self.__write_to_file(file_name=self.bad_file, str_to_write=need_write)
         elif 'invalid payload' in str(soup):
             print('---> This is not a domain! Check - ' + str(self.domain[self.count - 1]))
+        elif 'Please verify you are a human' in str(soup):
+            raise Human_test('---> Please verify you are a human! - ')
+
         else:
             find_json = soup.find('pre').text
             _json = json.loads(find_json)
@@ -148,7 +158,7 @@ class Similar:
 
 if __name__ == '__main__':
     start_time = time.time()
-    similar = Similar(headless=True)  # if False - the browser will be visible, if True - will not be
+    similar = Similar(headless=False)  # if False - the browser will be visible, if True - will not be
     print('---> Starting data collection')
     similar.run()
     finish_time = time.time()
